@@ -1,13 +1,11 @@
 const fetch = (...args) =>
   import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-
-
 let ACCESS_TOKEN = '';
 
 async function generateToken() {
   const response = await fetch(
-    `https://${SHOP}/admin/oauth/access_token`,
+    `https://${process.env.SHOP}/admin/oauth/access_token`,
     {
       method: 'POST',
       headers: {
@@ -15,8 +13,8 @@ async function generateToken() {
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
       }),
     }
   );
@@ -26,14 +24,7 @@ async function generateToken() {
   return data.access_token;
 }
 
-generateToken().then((token) => {
-  ACCESS_TOKEN = token;
-});
-
-
-
-const API_URL =
-  `https://${SHOP}/admin/api/2024-04/graphql.json`;
+const getApiUrl = () => `https://${process.env.SHOP}/admin/api/2024-04/graphql.json`;
 
 const sleep = ms =>
   new Promise(r => setTimeout(r, ms));
@@ -42,7 +33,7 @@ const collectionCache = {};
 
 async function graphql(query, variables = {}) {
 
-  const response = await fetch(API_URL, {
+  const response = await fetch(getApiUrl(), {
     method: 'POST',
 
     headers: {
@@ -955,7 +946,7 @@ async function importProduct(items) {
 
 async function main(designNo) {
   const startTime = Date.now();
-  const response = await fetch(EXTERNAL_API);
+  const response = await fetch(process.env.EXTERNAL_API);
 
   const json = await response.json();
 
@@ -1065,11 +1056,23 @@ async function main(designNo) {
 
 }
 
-const designNo = process.argv[2];
+module.exports = async function handler(req, res) {
+  try {
+    const designNo = req.query.designno || req.body?.designnos || req.body?.designno;
+    
+    if (!designNo) {
+      return res.status(400).json({ error: "Design number required. Pass ?designno=123" });
+    }
 
-if (!designNo) {
-  console.log("❌ Design number required");
-  process.exit(1);
-}
+    if (!ACCESS_TOKEN) {
+      ACCESS_TOKEN = await generateToken();
+    }
 
-main(designNo);
+    await main(designNo);
+    
+    return res.status(200).json({ success: true, message: `Imported design ${designNo} successfully` });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+};
