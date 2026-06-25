@@ -48,7 +48,7 @@ const server = http.createServer(async (req, res) => {
     res.end('Not Found');
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`\n✅ Local Server running!`);
     console.log(`👉 Open http://localhost:${PORT} in your browser to test locally.`);
