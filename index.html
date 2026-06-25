@@ -280,7 +280,7 @@ document.getElementById('importForm').addEventListener('submit', async function(
     
     logCard.style.display = 'block';
     logDesignNos.textContent = hiddenInput.value;
-    logOutput.textContent = 'Connecting to server...\n';
+    logOutput.textContent = 'Starting import Please wait...\n';
 
     const url = `/api/import?designno=${encodeURIComponent(hiddenInput.value)}`;
     const eventSource = new EventSource(url);
@@ -292,6 +292,13 @@ document.getElementById('importForm').addEventListener('submit', async function(
             importBtn.textContent = 'Import Products';
             logOutput.textContent += '\n\n✅ Import process fully completed.';
             logCard.scrollTop = logCard.scrollHeight;
+
+            // Clear the tags input box cleanly without refreshing the page
+            tags = [];
+            document.querySelectorAll('.tag').forEach(t => t.remove());
+            updateHiddenField();
+            tagInput.value = '';
+
             return;
         }
         
