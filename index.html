@@ -287,12 +287,17 @@ document.getElementById('importForm').addEventListener('submit', async function(
             method: 'GET'
         });
         
-        const data = await response.json();
-        
-        if (response.ok) {
-            logOutput.textContent += '\n\n' + data.message + '\n\n(Detailed script logs can be viewed in your Vercel Dashboard Logs)';
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            if (response.ok) {
+                logOutput.textContent += '\n\n' + data.message + '\n\n(Detailed script logs can be viewed in your Vercel Dashboard Logs)';
+            } else {
+                logOutput.textContent += '\n\nError: ' + (data.error || 'Unknown error occurred.');
+            }
         } else {
-            logOutput.textContent += '\n\nError: ' + (data.error || 'Unknown error occurred.');
+            const text = await response.text();
+            logOutput.textContent += '\n\nServer Error (' + response.status + '):\n' + text;
         }
     } catch (err) {
         logOutput.textContent += '\n\nNetwork Error: ' + err.message;

@@ -1,5 +1,3 @@
-const fetch = (...args) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 let ACCESS_TOKEN = '';
 
