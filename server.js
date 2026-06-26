@@ -25,9 +25,8 @@ const server = http.createServer((req, res) => {
 
         const designNo = parsedUrl.query.designno || req.body?.designnos || req.body?.designno;
         
-        res.write(`data: \n==============================================\n\n`);
-        res.write(`data: [SERVER] 🚀 Spawning background process for: ${designNo}\n\n`);
-        res.write(`data: ==============================================\n\n`);
+        console.log(`[SERVER] 🚀 Spawning background process for: ${designNo}.`);
+
         
         if (!designNo) {
             res.write(`data: ❌ ERROR: Design number required.\n\n`);
