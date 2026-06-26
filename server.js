@@ -42,7 +42,7 @@ const server = http.createServer((req, res) => {
         child.stdout.on('data', (data) => {
             const lines = data.toString().split('\n');
             for (const line of lines) {
-                if (line) res.write(`data: ${line}\n\n`);
+                if (line) console.log(`${line}`);
             }
         });
 
@@ -50,7 +50,7 @@ const server = http.createServer((req, res) => {
         child.stderr.on('data', (data) => {
             const lines = data.toString().split('\n');
             for (const line of lines) {
-                if (line) res.write(`data: ❌ ERROR: ${line}\n\n`);
+                if (line) console.log(`${line}`);
             }
         });
 
