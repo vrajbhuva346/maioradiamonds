@@ -1,11 +1,9 @@
-const fetch = (...args) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(...args));
+require('dotenv').config();
 
 const SHOP = process.env.SHOP;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const EXTERNAL_API = process.env.EXTERNAL_API;
-const LOCATION_ID = process.env.LOCATION_ID;
 
 let ACCESS_TOKEN = '';
 
@@ -30,10 +28,12 @@ async function generateToken() {
   return data.access_token;
 }
 
+generateToken().then((token) => {
+  ACCESS_TOKEN = token;
+});
+
 const API_URL =
   `https://${SHOP}/admin/api/2024-04/graphql.json`;
-
-
 
 const sleep = ms =>
   new Promise(r => setTimeout(r, ms));
@@ -196,7 +196,7 @@ function productMetafields(item) {
     { key: 'metal_type', value: item.metaltype || '' },
     { key: 'misc', value: item.misc || '-' },
     { key: 'gender', value: item.gender || '-' },
-    { key: 'product_dimensions', value: item.height_width_length || '-' },
+    { key: 'product_dimensions',value: item.height_width_length || '-'},
     { key: 'occassion', value: item.occassion || '' },
     { key: 'style', value: item.style || '' },
     { key: 'sub_category', value: item.subcategory || '' },
@@ -220,28 +220,22 @@ function productMetafields(item) {
   ];
 
   const jsonFields = [
-    { key: 'color_stone', value: parseJson(item.colorstone) },
-    { key: 'diamond_details', value: parseJson(item.diamond) },
-    { key: 'tax_data', value: parseJson(item.taxdata) },
-    { key: 'center_stone', value: parseJson(item.centerstone) }
+    { key: 'color_stone', value: parseJson(item.colorstone)},
+    { key: 'diamond_details',value: parseJson(item.diamond)},
+    { key: 'tax_data',value: parseJson(item.taxdata)},
+    { key: 'center_stone', value: parseJson(item.centerstone)}
   ];
 
   return [
 
-    ...textFields.map(f => ({
-      namespace: 'custom', key: f.key, type: 'single_line_text_field',
-      value: String(f.value)
-    })),
+    ...textFields.map(f => ({ namespace: 'custom', key: f.key, type: 'single_line_text_field',
+     value: String(f.value) })),
 
-    ...decimalFields.map(f => ({
-      namespace: 'custom', key: f.key, type: 'number_decimal',
-      value: String(f.value)
-    })),
+    ...decimalFields.map(f => ({ namespace: 'custom', key: f.key, type: 'number_decimal',
+     value: String(f.value) })),
 
-    ...jsonFields.map(f => ({
-      namespace: 'custom', key: f.key, type: 'json',
-      value: JSON.stringify(f.value)
-    })),
+    ...jsonFields.map(f => ({ namespace: 'custom', key: f.key, type: 'json',
+     value: JSON.stringify(f.value) })),
 
   ];
 }
@@ -249,8 +243,8 @@ function productMetafields(item) {
 function variantMetafields(item) {
 
   const textFields = [
-    { key: 'product_type', value: item.producttype || '' },
-    { key: 'misc', value: item.misc || '' }
+   { key: 'product_type', value: item.producttype || '' },
+   { key: 'misc', value: item.misc || '' }
   ];
 
   const decimalFields = [
@@ -267,26 +261,20 @@ function variantMetafields(item) {
   ];
 
   const jsonFields = [
-    { key: 'diamond_details', value: parseJson(item.diamond) },
-    { key: 'color_stone', value: parseJson(item.colorstone) },
-    { key: 'center_stone', value: parseJson(item.centerstone) }
+    { key: 'diamond_details',value: parseJson(item.diamond)},
+    { key: 'color_stone', value: parseJson(item.colorstone)},
+    { key: 'center_stone', value: parseJson(item.centerstone)}
   ];
 
   return [
-    ...textFields.map(f => ({
-      namespace: 'custom', key: f.key, type: 'single_line_text_field',
-      value: String(f.value)
-    })),
+    ...textFields.map(f => ({ namespace: 'custom', key: f.key, type: 'single_line_text_field',
+     value: String(f.value) })),
 
-    ...decimalFields.map(f => ({
-      namespace: 'custom', key: f.key, type: 'number_decimal',
-      value: String(f.value)
-    })),
+    ...decimalFields.map(f => ({ namespace: 'custom', key: f.key, type: 'number_decimal',
+     value: String(f.value) })),
 
-    ...jsonFields.map(f => ({
-      namespace: 'custom', key: f.key, type: 'json',
-      value: JSON.stringify(f.value)
-    })),
+    ...jsonFields.map(f => ({ namespace: 'custom', key: f.key, type: 'json',
+     value: JSON.stringify(f.value) })),
   ];
 }
 
@@ -304,7 +292,7 @@ function buildOptions(items) {
 
   const metalQualities = [...new Set(items.map(item => item.metalquality).filter(Boolean))];
 
-  const jewellerySizes = [...new Set(items.map(item => item.jewllerysize).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
+  const jewellerySizes = [...new Set(items.map(item => item.jewllerysize).filter(Boolean))];
 
   if (metalColors?.[0]) {
     options.push({ name: 'Metal Color', values: metalColors.map(value => ({ name: String(value) })) });
@@ -316,12 +304,13 @@ function buildOptions(items) {
 
 
   if (jewellerySizes?.[0]) {
-    options.push({ name: 'Jewellery Size', values: jewellerySizes.map(value => ({ name: String(value) })) });
+   options.push({ name: 'Jewellery Size', values: jewellerySizes.map(value => ({ name: String(value) })) });
   }
 
   return options;
 }
 
+// VARIANT OPTION VALUES
 
 function buildVariantOptionValues(item) {
 
@@ -337,7 +326,7 @@ function buildVariantOptionValues(item) {
   }
 
   if (item.jewllerysize) {
-    optionValues.push({ optionName: 'Jewellery Size', name: String(item.jewllerysize) });
+    optionValues.push({ optionName: 'Jewellery Size', name: String(item.jewllerysize)});
   }
 
   return optionValues;
@@ -355,21 +344,6 @@ query ($query: String!) {
           value
         }
       }
-    }
-  }
-}
-`;
-
-const SET_INVENTORY = `
-mutation inventorySetQuantities($input: InventorySetQuantitiesInput!) {
-  inventorySetQuantities(input: $input) {
-    inventoryAdjustmentGroup {
-      createdAt
-      reason
-    }
-    userErrors {
-      field
-      message
     }
   }
 }
@@ -464,9 +438,6 @@ query ($id: ID!) {
       edges {
         node {
           id
-          inventoryItem {
-            id
-          }
         }
       }
     }
@@ -506,9 +477,6 @@ mutation (
   ) {
     productVariants {
       id
-      inventoryItem {
-        id
-      }
     }
 
     userErrors {
@@ -573,8 +541,8 @@ async function importProduct(items) {
   //const handle = (first.designno || '').toLowerCase().replace(/[_ ]/g, '-');
 
   const handle = (
-    first.titleline?.trim() ? first.titleline : first.designno || '').toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-').replace(/-+/g, '-');
+  first.titleline?.trim() ? first.titleline : first.designno || '').toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '')
+  .replace(/\s+/g, '-').replace(/-+/g, '-');        
 
   const title = first.titleline || first.designno || 'Untitled Product';
 
@@ -617,153 +585,141 @@ async function importProduct(items) {
   //console.log(JSON.stringify(existing, null, 2));
 
   const existingProduct =
-    existing?.data?.products?.edges?.[0]?.node;
+  existing?.data?.products?.edges?.[0]?.node;
 
   let productId;
-
+  
   // UPDATE PRODUCT
+  
+ if (existingProduct) {
 
-  if (existingProduct) {
-    productId = existingProduct.id;
+  const updated = await graphql(UPDATE_PRODUCT, {
+    input: {
+      id: existingProduct.id,
+      ...productInput
+    }
+  });
+
+  productId = updated?.data?.productUpdate?.product?.id;
+
+  // UPDATE ALL VARIANTS
+
+  if (hasVariants) {
 
     const GET_ALL_VARIANTS = `
-      query ($id: ID!) {
-        product(id: $id) {
-          variants(first: 250) {
-            edges {
-              node {
-                id
-                sku
-                inventoryItem {
-                  id
-                }
-              }
+    query ($id: ID!) {
+      product(id: $id) {
+        variants(first: 100) {
+          edges {
+            node {
+              id
+              sku
             }
           }
         }
       }
-      `;
+    }
+    `;
 
-
-    const variantResult = await graphql(GET_ALL_VARIANTS, {
-      id: productId
-    });
-
+    const variantResult = await graphql(
+      GET_ALL_VARIANTS,
+      { id: productId }
+    );
 
     const existingVariants =
       variantResult?.data?.product?.variants?.edges || [];
 
-    // Fast SKU lookup
-    const variantMap = new Map(
-      existingVariants.map(v => [v.node.sku?.trim(), v.node])
-    );
+    for (const item of items) {
 
-    if (hasVariants) {
+      const matchedVariant =
+        existingVariants.find(
+          v => v.node.sku === item.articleno
+        );
 
-      const variantsToUpdate = [];
-      const inventoryQuantities = [];
+      const optionValues = [];
 
-      for (const item of items) {
-
-        const matchedVariant =
-          variantMap.get(item.articleno?.trim());
-
-        if (!matchedVariant) {
-          // console.log(`Variant not found: ${item.articleno}`);
-          continue;
-        }
-
-        variantsToUpdate.push({
-          id: matchedVariant.id,
-          price: String(item.saleprice || item.price || 0),
-          compareAtPrice: String(item.price || 0),
-          inventoryPolicy: "CONTINUE"
-        });
-
-        inventoryQuantities.push({
-          inventoryItemId: matchedVariant.inventoryItem.id,
-          locationId: LOCATION_ID,
-          quantity: Number(item.instock || 0)
-          //quantity: 99
+      if (item.metalcolor) {
+        optionValues.push({
+          optionName: 'Metal Color',
+          name: item.metalcolor
         });
       }
 
-      const VARIANT_BATCH = 50;
-
-      for (let i = 0; i < variantsToUpdate.length; i += VARIANT_BATCH) {
-
-        const batch = variantsToUpdate.slice(i, i + VARIANT_BATCH);
-
-        const res = await graphql(UPDATE_VARIANT, {
-          productId,
-          variants: batch
+      if (item.metalquality) {
+        optionValues.push({
+          optionName: 'Metal Quality',
+          name: item.metalquality
         });
-
-        const errors =
-          res?.data?.productVariantsBulkUpdate?.userErrors;
-
-        if (errors?.length) {
-          //console.log(errors);
-        }
       }
 
-      const INVENTORY_BATCH = 50;
-
-      for (let i = 0; i < inventoryQuantities.length; i += INVENTORY_BATCH) {
-
-        const batch = inventoryQuantities.slice(i, i + INVENTORY_BATCH);
-
-        const res = await graphql(SET_INVENTORY, {
-          input: {
-            name: "available",
-            reason: "correction",
-            ignoreCompareQuantity: true,
-            quantities: batch
-          }
+      if (item.jewllerysize) {
+        optionValues.push({
+          optionName: 'Jewellery Size',
+          name: item.jewllerysize
         });
-
-        const errors =
-          res?.data?.inventorySetQuantities?.userErrors;
-
-        if (errors?.length) {
-          //console.log(errors);
-        }
       }
-    } else {
 
-      const variant = existingVariants[0]?.node;
+      // UPDATE EXISTING VARIANT
 
-      if (variant) {
+      if (matchedVariant) {
 
         await graphql(UPDATE_VARIANT, {
           productId,
+
           variants: [{
-            id: variant.id,
-            price: String(first.saleprice || first.price || 0),
-            compareAtPrice: String(first.price || 0)
+            id: matchedVariant.node.id,
+
+            price: String(item.saleprice || item.price || 0),
+
+            compareAtPrice:String(item.price || 0),
+
+            metafields:
+              variantMetafields(item),
+
+            inventoryItem: {
+              tracked: false,
+              sku: item.articleno || ''
+            },
+
+            optionValues
+
           }]
         });
 
-        await graphql(SET_INVENTORY, {
-          input: {
-            name: "available",
-            reason: "correction",
-            ignoreCompareQuantity: true,
-            quantities: [{
-              inventoryItemId: variant.inventoryItem.id,
-              locationId: LOCATION_ID,
-              quantity: Number(first.instock || 0)
-            }]
-          }
+      } else {
+
+        // CREATE NEW VARIANT
+
+        await graphql(CREATE_VARIANTS_BULK, {
+          productId,
+
+          variants: [{
+            price: String(
+              item.saleprice ||
+              item.price ||
+              0
+            ),
+
+           compareAtPrice:String(item.price || 0),
+
+            metafields:
+              variantMetafields(item),
+
+            inventoryItem: {
+              tracked: false,
+              sku: item.articleno || ''
+            },
+
+            optionValues
+          }]
         });
-
       }
-
-    } return;
-  } else {
-
+    }
+   }
+  }else {
+    
     // CREATE PRODUCT
-
+    
     const media = [];
 
     if (first.imagesrc) {
@@ -774,7 +730,7 @@ async function importProduct(items) {
       });
     }
 
-    if (first.videosrc) {
+   if (first.videosrc) {
 
       const videoUrl = first.videosrc;
 
@@ -830,9 +786,9 @@ async function importProduct(items) {
   if (!productId) {
     throw new Error('Product not created');
   }
-
+  
   // SIMPLE PRODUCT
-
+  
   if (!hasVariants) {
 
     const varResult = await graphql(GET_VARIANT, { id: productId });
@@ -851,35 +807,16 @@ async function importProduct(items) {
           compareAtPrice: String(first.price || 0),
 
           inventoryItem: {
-            tracked: true,
+            tracked: false,
             sku: first.articleno || ''
           }
         }]
       });
     }
 
-    const variant = varResult.data.product.variants.edges[0].node;
-
-    if (variant) {
-
-      await graphql(SET_INVENTORY, {
-        input: {
-          name: "available",
-          reason: "correction",
-          ignoreCompareQuantity: true,
-          quantities: [{
-            inventoryItemId: variant.inventoryItem.id,
-            locationId: LOCATION_ID,
-            quantity: Number(first.instock || 0)
-          }]
-        }
-      });
-
-    }
-
-
-
   } else {
+    
+    // VARIANT PRODUCT    
 
     const options = buildOptions(items);
 
@@ -892,6 +829,8 @@ async function importProduct(items) {
 
       await sleep(500);
     }
+
+    // UPDATE AUTO CREATED FIRST VARIANT
 
     const varResult = await graphql(GET_VARIANT, { id: productId });
 
@@ -933,12 +872,11 @@ async function importProduct(items) {
           price: String(firstItem.saleprice || firstItem.price || 0),
 
           compareAtPrice: String(firstItem.price || 0),
-          inventoryPolicy: "CONTINUE",
 
           metafields: variantMetafields(firstItem),
 
           inventoryItem: {
-            tracked: true,
+            tracked: false,
             sku: firstItem.articleno || ''
           },
 
@@ -949,118 +887,80 @@ async function importProduct(items) {
           })
         }]
       });
+    }
 
-      const firstVariant = varResult.data.product.variants.edges[0].node;
+    // CREATE REMAINING VARIANTS
 
-      const inventoryItemId = firstVariant.inventoryItem.id;
+    const remainingItems = items.slice(1);
 
-      await graphql(SET_INVENTORY, {
-        input: {
-          name: "available",
-          reason: "correction",
-          ignoreCompareQuantity: true,
-          quantities: [{
-            inventoryItemId,
-            locationId: LOCATION_ID,
-            quantity: Number(firstItem.instock || 0)
-          }]
-        }
-      });
+    const VARIANT_BATCH = 3;
 
-      // CREATE REMAINING VARIANTS
+    for (let i = 0; i < remainingItems.length; i += VARIANT_BATCH) {
 
-      const remainingItems = items.slice(1);
+      const batch = remainingItems.slice(i, i + VARIANT_BATCH);
 
-      const VARIANT_BATCH = 3;
+      await Promise.all(
+        batch.map(async item => {
 
-      for (let i = 0; i < remainingItems.length; i += VARIANT_BATCH) {
+          const optionValues = [];
 
-        const batch = remainingItems.slice(i, i + VARIANT_BATCH);
-
-        await Promise.all(
-          batch.map(async item => {
-
-            const optionValues = [];
-
-            if (item.metalcolor) {
-              optionValues.push({
-                optionName: 'Metal Color',
-                name: item.metalcolor
-              });
-            }
-
-            if (item.metalquality) {
-              optionValues.push({
-                optionName: 'Metal Quality',
-                name: item.metalquality
-              });
-            }
-
-            if (item.jewllerysize) {
-              optionValues.push({
-                optionName: 'Jewellery Size',
-                name: item.jewllerysize
-              });
-            }
-
-            const variantInput = {
-
-              price: String(item.saleprice || item.price || 0),
-
-              compareAtPrice: String(item.price || 0),
-              inventoryPolicy: "CONTINUE",
-
-              metafields: variantMetafields(item),
-
-              inventoryItem: {
-                tracked: true,
-                sku: item.articleno || ''
-              },
-
-              ...(optionValues.length > 0 && {
-                optionValues
-              }),
-
-              ...(item.imagesrc && {
-                mediaSrc: item.imagesrc
-              })
-            };
-
-            const created = await graphql(CREATE_VARIANTS_BULK, {
-              productId,
-              variants: [variantInput]
+          if (item.metalcolor) {
+            optionValues.push({
+              optionName: 'Metal Color',
+              name: item.metalcolor
             });
+          }
 
-            const errors =
-              created?.data?.productVariantsBulkCreate?.userErrors;
-
-            if (errors?.length) {
-              // console.log(errors);
-              return;
-            }
-
-            const newVariant =
-              created.data.productVariantsBulkCreate.productVariants[0];
-
-            await graphql(SET_INVENTORY, {
-              input: {
-                name: "available",
-                reason: "correction",
-                ignoreCompareQuantity: true,
-                quantities: [{
-                  inventoryItemId: newVariant.inventoryItem.id,
-                  locationId: LOCATION_ID,
-                  quantity: Number(item.instock || 0)
-                }]
-              }
+          if (item.metalquality) {
+            optionValues.push({
+              optionName: 'Metal Quality',
+              name: item.metalquality
             });
-          })
-        );
+          }
 
-        await sleep(500);
-      }
+          if (item.jewllerysize) {
+            optionValues.push({
+              optionName: 'Jewellery Size',
+              name: item.jewllerysize
+            });
+          }
+
+          const variantInput = {
+
+            price: String(item.saleprice || item.price || 0),
+
+            compareAtPrice:String(item.price || 0),
+
+            metafields: variantMetafields(item),
+
+            inventoryItem: {
+              tracked: false,
+              sku: item.articleno || ''
+            },
+
+            ...(optionValues.length > 0 && {
+              optionValues
+            }),
+
+            ...(item.imagesrc && {
+              mediaSrc: item.imagesrc
+            })
+          };
+
+          const created = await graphql(CREATE_VARIANTS_BULK, {
+            productId,
+            variants: [variantInput]
+          });
+
+          const errors =
+            created?.data?.productVariantsBulkCreate?.userErrors;
+        })
+      );
+
+      await sleep(500);
     }
   }
+
   // COLLECTION
 
   const collectionId = await getCollection(first.collection);
@@ -1098,8 +998,8 @@ async function main(designNo) {
   const groupedProducts = Object.values(grouped);
 
   const requestedDesignNos = designNo
-    .split(',')
-    .map(item => item.trim());
+  .split(',')
+  .map(item => item.trim());
 
   const availableDesignNos = new Set(
     groupedProducts.map(items => items[0]?.designno)
@@ -1113,12 +1013,12 @@ async function main(designNo) {
     console.log(`❌ Design Number ${design} not found`);
   });
 
-  /* const products = groupedProducts.filter(
-      items => items[0]?.designno === designNo
-    );*/
+/* const products = groupedProducts.filter(
+    items => items[0]?.designno === designNo
+  );*/
 
   const products = groupedProducts.filter(
-    items => requestedDesignNos.includes(items[0]?.designno)
+  items => requestedDesignNos.includes(items[0]?.designno)
   );
 
   // const products = groupedProducts.slice(400, 500);
@@ -1195,7 +1095,4 @@ if (!designNo) {
   process.exit(1);
 }
 
-(async () => {
-  ACCESS_TOKEN = await generateToken();
-  await main(designNo);
-})();
+main(designNo);
